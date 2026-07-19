@@ -8,6 +8,7 @@
     Collects:
     - Windows version
     - Computer manufacturer and model
+    - BIOS version and release date
     - CPU
     - GPU(s)
     - Installed RAM
@@ -89,6 +90,7 @@ $operatingSystem = Get-CimInstance Win32_OperatingSystem
 $processor = Get-CimInstance Win32_Processor | Select-Object -First 1
 $videoControllers = Get-CimInstance Win32_VideoController
 $physicalMemory = Get-CimInstance Win32_PhysicalMemory
+$bios = Get-CimInstance Win32_BIOS | Select-Object -First 1
 
 # Device name is optional and can be removed from the report if preferred.
 $deviceName = $env:COMPUTERNAME
@@ -170,6 +172,24 @@ $baseboard = Get-CimInstance Win32_BaseBoard | Select-Object -First 1
 
 $motherboard = if ($baseboard.Manufacturer -or $baseboard.Product) {
     "$($baseboard.Manufacturer) $($baseboard.Product)".Trim()
+}
+else {
+    "Unable to detect"
+}
+
+# BIOS
+$biosVersion = if ($bios.SMBIOSBIOSVersion) {
+    $bios.SMBIOSBIOSVersion.Trim()
+}
+elseif ($bios.Version) {
+    $bios.Version.Trim()
+}
+else {
+    "Unable to detect"
+}
+
+$biosReleaseDate = if ($bios.ReleaseDate) {
+    ([datetime]$bios.ReleaseDate).ToString("yyyy-MM-dd")
 }
 else {
     "Unable to detect"
@@ -274,6 +294,8 @@ $codeFence`text
 Device Name:      $deviceName
 System Model:     $systemModel
 Motherboard:      $motherboard
+BIOS Version:     $biosVersion
+BIOS Release Date: $biosReleaseDate
 Operating System: $windowsName
 Windows Version:  $windowsRelease (OS Build $fullBuildNumber)
 Original Install Date: $originalInstallDate
@@ -297,7 +319,6 @@ PowerShell:
 $($PSVersionTable.PSVersion)
 $codeFence
 
-_Report generated automatically. No product keys, IP addresses, MAC addresses, or personal files were collected._
 "@
 
 # Save report to Desktop
