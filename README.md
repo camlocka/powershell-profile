@@ -1,6 +1,7 @@
 # powershell-profile 
 
 Collects basic Windows PC specifications and creates a Discord-ready report.
+   > irm "https://raw.githubusercontent.com/camlocka/powershell-profile/main/specs.ps1" | iex
 
 .DESCRIPTION
     Collects:
